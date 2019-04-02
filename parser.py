@@ -10,11 +10,8 @@ class Node:
         self.parent=[]
         self.child=[]
         self.probs={}
-        self.dic={}
     def addProb(self, values, prob):
         self.probs[repr(values)]=prob
-    def findProb(self, evidence):
-        pass
     def findClass(self, value):
         pos=0
         for c in self.classes:

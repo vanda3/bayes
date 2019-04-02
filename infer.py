@@ -28,16 +28,6 @@ def inference(nodes, q, es, debug):
                 print("ANC: ", ancestor)
                 print("EVL: ", evl)
                 i+=1
-    for name, node in nodes.items():
-        if name==q or name in e:
-            enum()
-
-
-def enum(X, e, es, nodes):
-    dist=[]
-    for name, node in nodes.items():
-        if name==X or name in e:
-            pass
 
 
 if __name__ == "__main__":
