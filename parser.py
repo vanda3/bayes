@@ -10,8 +10,17 @@ class Node:
         self.parent=[]
         self.child=[]
         self.probs={}
+        self.dic={}
     def addProb(self, values, prob):
         self.probs[repr(values)]=prob
+    def findProb(self, evidence):
+        pass
+    def findClass(self, value):
+        pos=0
+        for c in self.classes:
+            if c==value:
+                return pos
+            pos+=1
 
 
 def debug(nodes):
@@ -23,6 +32,7 @@ def debug(nodes):
         print("Probabilities: ")
         for key, value in n.probs.items():
             print("\t",key," ", value)
+
 
 def parser(name):
     char_list = '[(),;]'

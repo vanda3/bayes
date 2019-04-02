@@ -1,5 +1,6 @@
 from parser import parser, debug
 
+
 def inference(nodes, q, es, debug):
     ancestor=[]
     e=[]
@@ -7,7 +8,7 @@ def inference(nodes, q, es, debug):
     evl=[] # list of ancestors
     for k,v in es.items():
         ancestor.append(k)
-        e.appedn(k)
+        e.append(k)
     i=0
     # find all ancestors
     while len(ancestor)!=0:
@@ -30,12 +31,13 @@ def inference(nodes, q, es, debug):
     for name, node in nodes.items():
         if name==q or name in e:
             enum()
-    
+
+
 def enum(X, e, es, nodes):
     dist=[]
     for name, node in nodes.items():
         if name==X or name in e:
-
+            pass
 
 
 if __name__ == "__main__":
