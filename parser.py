@@ -12,12 +12,25 @@ class Node:
         self.probs={}
     def addProb(self, values, prob):
         self.probs[repr(values)]=prob
-    def findClass(self, value):
+    def classPos(self, value):
         pos=0
         for c in self.classes:
             if c==value:
                 return pos
             pos+=1
+    def parentPos(self, par):
+        pos=0
+        for p in self.parent:
+            if p==par:
+                return pos
+            pos+=1
+    def enum(self, e):
+        tmp=self.probs
+        for k, v in e.items():
+            if k in self.parent:
+                pos=parentPos(k)
+
+
 
 
 def debug(nodes):
@@ -34,6 +47,7 @@ def debug(nodes):
 def parser(name):
     char_list = '[(),;]'
     nodes = {}
+    names=[]
     bif = []
     name=str(name)+".bif"
     file = open(name,mode='r+')
@@ -44,6 +58,7 @@ def parser(name):
         fst=line[0].strip()
         if fst=="variable":
             name=line[1].strip()
+            names.append(name)
             nodes[name]=Node(name)
             i+=1
             line = [x for x in bif[i].split(' ') if x!= '']
@@ -103,4 +118,24 @@ def parser(name):
                 nodes[name].addProb([],probs)
         else: #network
             pass
-    return nodes
+    return nodes, names
+
+def queryParser(q):
+    e=[]
+    occur=q.count('|')
+    if occur==0:
+        print("1. Q:",q," E:",e)
+        return q, e
+    else:
+        tmp=[x for x in q.split('|') if x!= '']
+        q=tmp[0]
+        occur=tmp[1].count(',')
+        if occur==0:
+            e.append(tmp[1])
+            print("2. Q:",q," E:",e)
+        else:
+            tmp1=[x for x in tmp[1].split(',') if x!= '']
+            for ev in tmp1:
+                e.append(ev)
+            print("3. Q:",q," E:",e)
+    return q, e

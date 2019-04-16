@@ -1,33 +1,9 @@
-from parser import parser, debug
+from parser import parser, debug, queryParser
 
 
-def inference(nodes, q, es, debug):
+def inference(nodes, q, e, debug):
     ancestor=[]
     e=[]
-    ancestor.append(q)
-    evl=[] # list of ancestors
-    for k,v in es.items():
-        ancestor.append(k)
-        e.append(k)
-    i=0
-    # find all ancestors
-    while len(ancestor)!=0:
-        curr=ancestor.pop(0)
-        if debug:
-            print("CURR: ",curr)
-        if curr not in evl:
-            if debug:
-                print("Iter ",i,": ",ancestor)
-            evl.append(curr)
-            parents=nodes[curr].parent
-            if len(parents)!=0:
-                for p in parents:
-                    if p not in evl: 
-                        ancestor.append(p)
-            if debug:
-                print("ANC: ", ancestor)
-                print("EVL: ", evl)
-                i+=1
 
 
 if __name__ == "__main__":
@@ -35,19 +11,27 @@ if __name__ == "__main__":
     es={}
     print("Input BIF file name w/o extension")
     file=str(input())
-    nodes=parser(file)
+    nodes, names=parser(file)
     debug(nodes)
-    print("Input query variable")
-    q=str(input())
-    print("Input evidence (e.g. X=false), type # when finished")
-    e=str(input())
-    print("evidence: ",e)
-    while e.count('#')==0:
-        a=e.split('=')
-        if(a[1] in nodes[a[0]].classes):
-            es[a[0].strip()]=a[1].strip()
-            print("0:",a[0].strip(), ", 1:",a[1].strip())
+    print("Available Variables: ",names)
+    print("Pr? ",end='')
+    query=str(input())
+    q, e = queryParser(query)
+    flag=2
+    while flag!=0:
+        if q not in names:
+            print("Error, ",q, " not available.")
+            flag=1
+        for ev in e:
+            if ev not in names:
+                print("Error, ",ev, " not available.")
+                flag=1
+        if flag==1:      
+            print("Available variables: ", names)
+            print("Try again.")
+            query=str(input)
+            q, e = queryParser(query)
         else:
-            print("Error, available values:", nodes[a[0]].classes)
-        e=str(input())
-    inference(nodes,q,es,True)
+            flag=0
+        flag=2
+    #inference(nodes,q,e,True)
