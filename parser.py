@@ -18,6 +18,8 @@ class Node:
             if c==value:
                 return pos
             pos+=1
+    def isRoot(self):
+        return len(self.parent)==0
     def parentPos(self, par):
         pos=0
         for p in self.parent:
@@ -29,8 +31,6 @@ class Node:
         for k, v in e.items():
             if k in self.parent:
                 pos=parentPos(k)
-
-
 
 
 def debug(nodes):
@@ -123,19 +123,22 @@ def parser(name):
 def queryParser(q):
     e=[]
     occur=q.count('|')
+    flag=0
     if occur==0:
-        print("1. Q:",q," E:",e)
-        return q, e
+        flag=1
+        print("Q:",q," E:",e, "F:",flag)
+        return q, e, flag
     else:
         tmp=[x for x in q.split('|') if x!= '']
-        q=tmp[0]
+        q=tmp[0].strip()
         occur=tmp[1].count(',')
         if occur==0:
-            e.append(tmp[1])
-            print("2. Q:",q," E:",e)
+            e.append(tmp[1].strip())
+            flag=2
         else:
             tmp1=[x for x in tmp[1].split(',') if x!= '']
             for ev in tmp1:
-                e.append(ev)
-            print("3. Q:",q," E:",e)
-    return q, e
+                e.append(ev.strip())
+            flag=2
+    print("Q:",q," E:",e, "F:",flag)
+    return q, e, flag
