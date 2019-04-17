@@ -1,10 +1,17 @@
 from parser import parser, debug, queryParser
 
-def core(nodes, q, e, flag, debug):
+# Core Algorithm
+def core(nodes, names, q, e, flag, debug):
     if(nodes[q].isRoot()):
-        print(nodes[q].probs["[]"])
+        print(nodes[q].classes,nodes[q].probs["[]"])
+        return
+    order=elimOrder(nodes,names)
+    for var in order:
+        for f in nodes[var].factor:
+            pass
 
-def order(nodes,names):
+# Determines variable topological elimination order
+def elimOrder(nodes,names): 
     order=[]
     nxt=[]
     # parents of a node go before node
@@ -16,14 +23,8 @@ def order(nodes,names):
                 if p not in order:
                     order+=[p]
             order+=[n]
-    print("ORDER:", order)
-            
-
-            
-        
-        
-
-            
+    return order
+  
 
 if __name__ == "__main__":
     file=""
@@ -54,5 +55,4 @@ if __name__ == "__main__":
         else:
             break
         f=0
-    order(nodes,names)
-    core(nodes,q,e,flag,True)
+    core(nodes,names,q,e,flag,True)

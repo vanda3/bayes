@@ -10,8 +10,16 @@ class Node:
         self.parent=[]
         self.child=[]
         self.probs={}
+        self.values={}
+        self.factor=[name]
     def addProb(self, values, prob):
         self.probs[repr(values)]=prob
+        self.values=values
+    def addParent(self, parent):
+        self.parent.append(parent)
+        self.factor.append(parent)
+    def addChild(self, child):
+        self.child.append(child)
     def classPos(self, value):
         pos=0
         for c in self.classes:
@@ -20,17 +28,6 @@ class Node:
             pos+=1
     def isRoot(self):
         return len(self.parent)==0
-    def parentPos(self, par):
-        pos=0
-        for p in self.parent:
-            if p==par:
-                return pos
-            pos+=1
-    def enum(self, e):
-        tmp=self.probs
-        for k, v in e.items():
-            if k in self.parent:
-                pos=parentPos(k)
 
 
 def debug(nodes):
@@ -87,8 +84,8 @@ def parser(name):
                 k=0
                 while k<=occur:
                     parent=re.sub(char_list, '', line[4+k].strip())
-                    nodes[name].parent.append(parent)
-                    nodes[parent].child.append(name)
+                    nodes[name].addParent(parent)
+                    nodes[parent].addChild(name)
                     k+=1
                 k=0
                 i+=1
