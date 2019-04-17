@@ -1,10 +1,29 @@
 from parser import parser, debug, queryParser
 
-
 def core(nodes, q, e, flag, debug):
     if(nodes[q].isRoot()):
         print(nodes[q].probs["[]"])
 
+def order(nodes,names):
+    order=[]
+    nxt=[]
+    # parents of a node go before node
+    for n in names:
+        if len(order)==0:
+            order=nodes[n].parent+[n]
+        else:
+            for p in nodes[n].parent:
+                if p not in order:
+                    order+=[p]
+            order+=[n]
+    print("ORDER:", order)
+            
+
+            
+        
+        
+
+            
 
 if __name__ == "__main__":
     file=""
@@ -35,4 +54,5 @@ if __name__ == "__main__":
         else:
             break
         f=0
+    order(nodes,names)
     core(nodes,q,e,flag,True)
