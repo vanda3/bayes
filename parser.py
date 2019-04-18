@@ -1,141 +1,165 @@
-import math 
 import re
-import numpy as np
 
 
 class Node:
     def __init__(self, name):
-        self.name=name
-        self.classes=[]
-        self.parent=[]
-        self.child=[]
-        self.probs={}
-        self.values={}
-        self.factor=[name]
+        self.name = name
+        self.classes = []
+        self.parent = []
+        self.child = []
+        self.probs = {}
+        self.values = {}
+        self.factor = [name]
+
     def addProb(self, values, prob):
-        self.probs[repr(values)]=prob
-        self.values=values
+        self.probs[repr(values)] = prob
+        self.values = values
+
     def addParent(self, parent):
         self.parent.append(parent)
         self.factor.append(parent)
+
     def addChild(self, child):
         self.child.append(child)
+
     def classPos(self, value):
-        pos=0
+        pos = 0
         for c in self.classes:
-            if c==value:
+            if c == value:
                 return pos
-            pos+=1
+            pos += 1
+
     def isRoot(self):
-        return len(self.parent)==0
+        return len(self.parent) == 0
 
 
 def debug(nodes):
-    for key, n in nodes.items():
-        print("Name: ",n.name)
-        print("Classes: ",n.classes)
-        print("Parents: ",n.parent)
-        print("Children: ",n.child)
+    print()
+    for _, n in nodes.items():
+        print("Name: ", n.name)
+        print("Classes: ", n.classes)
+        print("Parents: ", n.parent)
+        print("Children: ", n.child)
         print("Probabilities: ")
         for key, value in n.probs.items():
-            print("\t",key," ", value)
+            print("\t", key, " ", value)
 
 
 def parser(name):
     char_list = '[(),;]'
     nodes = {}
-    names=[]
+    names = []
     bif = []
-    name=str(name)+".bif"
-    file = open(name,mode='r+')
+    name = str(name) + ".bif"
+    file = open(name, mode='r+')
     for line in file:
         bif.append(line)
     for i in range(0, len(bif)):
-        line = [x for x in bif[i].split(' ') if x!= '']
-        fst=line[0].strip()
-        if fst=="variable":
-            name=line[1].strip()
+        line = [x for x in bif[i].split(' ') if x != '']
+        fst = line[0].strip()
+        if fst == "variable":
+            name = line[1].strip()
             names.append(name)
-            nodes[name]=Node(name)
-            i+=1
-            line = [x for x in bif[i].split(' ') if x!= '']
-            fst=line[0].strip()
-            while fst!="}":
-                if fst=="type":
-                    n=int(line[3].strip())
-                    k=0
-                    while n>0:
-                        nodes[name].classes.append(re.sub(char_list, '',line[6+k].strip()))
-                        k+=1
-                        n-=1
-                elif fst=="property":
+            nodes[name] = Node(name)
+            i += 1
+            line = [x for x in bif[i].split(' ') if x != '']
+            fst = line[0].strip()
+            while fst != "}":
+                if fst == "type":
+                    n = int(line[3].strip())
+                    k = 0
+                    while n > 0:
+                        nodes[name].classes.append(re.sub(char_list, '', line[6 + k].strip()))
+                        k += 1
+                        n -= 1
+                elif fst == "property":
                     # DEPOIS
                     pass
                 else:
-                    pass 
-                i+=1
-                line = [x for x in bif[i].split(' ') if x!= '']
-                fst=line[0].strip()
-        elif fst=="probability":
+                    pass
+                i += 1
+                line = [x for x in bif[i].split(' ') if x != '']
+                fst = line[0].strip()
+        elif fst == "probability":
             name = line[2].strip()
             # tem parents
-            if (line[3].strip()=='|'):
-                occur=bif[i].count(',')
-                k=0
-                while k<=occur:
-                    parent=re.sub(char_list, '', line[4+k].strip())
+            if line[3].strip() == '|':
+                occur = bif[i].count(',')
+                k = 0
+                while k <= occur:
+                    parent = re.sub(char_list, '', line[4 + k].strip())
                     nodes[name].addParent(parent)
                     nodes[parent].addChild(name)
-                    k+=1
-                k=0
-                i+=1
-                line = [x for x in bif[i].split(' ') if x!= '']
-                fst=line[0].strip()
-                while fst!="}":
-                    values={}
-                    probs=[]
-                    n_parents=len(nodes[name].parent)
-                    n_classes=len(nodes[name].classes)
-                    for m in range(0,n_parents):
-                        values[nodes[name].parent[m]]=re.sub(char_list, '', line[m].strip())
-                    for j in range(n_parents,n_parents+n_classes):
+                    k += 1
+                k = 0
+                i += 1
+                line = [x for x in bif[i].split(' ') if x != '']
+                fst = line[0].strip()
+                while fst != "}":
+                    values = {}
+                    probs = []
+                    n_parents = len(nodes[name].parent)
+                    n_classes = len(nodes[name].classes)
+                    for m in range(0, n_parents):
+                        values[nodes[name].parent[m]] = re.sub(char_list, '', line[m].strip())
+                    for j in range(n_parents, n_parents + n_classes):
                         probs.append(float(re.sub(char_list, '', line[j].strip())))
-                    nodes[name].addProb(values,probs)
-                    i+=1
-                    line = [x for x in bif[i].split(' ') if x!= '']
-                    fst=line[0].strip()
+                    nodes[name].addProb(values, probs)
+                    i += 1
+                    line = [x for x in bif[i].split(' ') if x != '']
+                    fst = line[0].strip()
             else:
-                i+=1
-                line = [x for x in bif[i].split(' ') if x!= '']
-                fst=line[0].strip()
-                probs=[]
-                n_classes=len(nodes[name].classes)
-                for j in range(1,n_classes+1):
+                i += 1
+                line = [x for x in bif[i].split(' ') if x != '']
+                fst = line[0].strip()
+                probs = []
+                n_classes = len(nodes[name].classes)
+                for j in range(1, n_classes + 1):
                     probs.append(float(re.sub(char_list, "", line[j].strip())))
-                nodes[name].addProb([],probs)
-        else: #network
+                nodes[name].addProb({}, probs)
+        else:  # network
             pass
     return nodes, names
 
+
 def queryParser(q):
-    e=[]
-    occur=q.count('|')
-    flag=0
-    if occur==0:
-        flag=1
-        print("Q:",q," E:",e, "F:",flag)
-        return q, e, flag
+    e = []
+    dicti = {}
+    occur = q.count('|')
+    flag = 0
+    if occur == 0:
+        flag = 1
     else:
-        tmp=[x for x in q.split('|') if x!= '']
-        q=tmp[0].strip()
-        occur=tmp[1].count(',')
-        if occur==0:
-            e.append(tmp[1].strip())
-            flag=2
+        tmp = [x for x in q.split('|') if x != '']
+        q = tmp[0].strip()
+        occur = tmp[1].count(',')
+        if occur == 0:
+            try:
+                # To remove all whitespaces and split the key, value
+                attrib = "".join(tmp[1].split()).split('=')
+                dicti[attrib[0]] = attrib[1]
+            except IndexError:
+                print("You have to attribute a value to the evidence")
+                return q, e, flag, -1
+                # e.append(tmp[1].strip())
+            finally:
+                flag = 2
         else:
-            tmp1=[x for x in tmp[1].split(',') if x!= '']
+            tmp1 = [x for x in tmp[1].split(',') if x != '']
             for ev in tmp1:
-                e.append(ev.strip())
-            flag=2
-    print("Q:",q," E:",e, "F:",flag)
-    return q, e, flag
+                try:
+                    # To remove all whitespaces and split the key, value
+                    attrib = "".join(ev.split()).split('=')
+                    dicti[attrib[0]] = attrib[1]
+                    # e.append(ev.strip())
+                except IndexError:
+                    print("You have to attribute a value to the evidence")
+                    return q, e, flag, -1
+                    # e.append(tmp[1].strip())
+                finally:
+                    flag = 2
+
+    print("Query:", q, " Evidence:", dicti, "Flag:", flag)
+
+    # Execution went OK
+    return q, e, flag, 0
