@@ -58,18 +58,17 @@ def process_query(var, perm, nodes):
         prob = nodes[var].getProbability(perm)      # Get the probability
         query_values = (str(perm), prob)
 
-    print(query_values)
+    # print(query_values)
     return query_values
 
 
-def make_factor(nodes, var, factor_vars, e):
+def make_factor(nodes, var, e):
     """
     Create a factor
     :param nodes:           The network
     :param var:             The selected variable's name.
-    :param factor_vars:     List of factor vars for the selected var.
     :param e:               Dictionary of the evidence
-    :return:
+    :return:                A list of the probabilities for the possible permutations
     """
 
     all_vars = []
@@ -94,13 +93,15 @@ def make_factor(nodes, var, factor_vars, e):
                     continue
 
     # Calculate probability for each permutation
-    probabilities = []
+    probabilities = {}
     for perm in perms:
         prob = process_query(var, perm, nodes)
-        probabilities.append(prob)
+        if var in probabilities:
+            probabilities[var].append(prob)
+        else:
+            probabilities[var] = [prob]
 
-    # To be continued...
-    return
+    return probabilities
 
 
 def init_factors(nodes, order, q, e):
@@ -116,7 +117,7 @@ def init_factors(nodes, order, q, e):
         variables = filter(lambda var: var not in elimd, list(nodes.keys()))
 
         # filter vars that have children yet not eliminated
-        # variables = filter(lambda var: all(child in elimd for child in nodes[var].child), variables)
+        variables = filter(lambda var: all(child in elimd for child in nodes[var].child), variables)
 
         # list, containing the unknown variables of the factor to be created
         factor_vars = [parent for parent in nodes[order[i]].parent if parent not in e.keys()]
@@ -125,11 +126,13 @@ def init_factors(nodes, order, q, e):
 
         # make the factor
         if len(factor_vars) > 0:
-            factors.append(make_factor(nodes, order[i], factor_vars, e))
+            factors.append(make_factor(nodes, order[i], e))
 
         print()
         i += 1      # This is just so that the loop stops. It isn't a part of the code
         # To be continued...
+
+    print(factors)
 
     return factors
 
