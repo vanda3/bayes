@@ -42,15 +42,21 @@ def gen_perms(vars):
 
 
 def process_query(var, perm, nodes):
-    query_values = {}
+    """
+    Gets the probability for the permutation
+    :param var:     The variable we query
+    :param perm:    The permutation in question
+    :param nodes:   The network
+    :return:        A tuple (query / permutation, probability)
+    """
 
     # The variable has no parents. Just return the probability it has set for that evidence value.
     if len(nodes[var].parent) == 0:
-        query_values[literal_eval(nodes[var].probs[0])] = nodes[var].probs[1][0]
+        query_values = (literal_eval(nodes[var].probs[0]), nodes[var].probs[1][0])
     # The variable has parents. Query its probability
     else:
-        prob = nodes[var].getProbability(perm)
-        query_values[str(perm)] = prob        # Get the probability
+        prob = nodes[var].getProbability(perm)      # Get the probability
+        query_values = (str(perm), prob)
 
     print(query_values)
     return query_values
@@ -88,10 +94,10 @@ def make_factor(nodes, var, factor_vars, e):
                     continue
 
     # Calculate probability for each permutation
-    probabilities = {}
+    probabilities = []
     for perm in perms:
         prob = process_query(var, perm, nodes)
-        probabilities[frozenset(perm)] = prob
+        probabilities.append(prob)
 
     # To be continued...
     return
