@@ -10,25 +10,22 @@ class Node:
         self.probs = {}
         self.values = {}
         self.factor = [name]
-
     def addProb(self, values, prob):
         self.probs[repr(values)] = prob
         self.values = values
-
+    def isRoot(self):
+        return len(self.parent) == 0
     def addParent(self, parent):
         self.parent.append(parent)
         self.factor.append(parent)
-
     def addChild(self, child):
         self.child.append(child)
-
     def classPos(self, value):
         pos = 0
         for c in self.classes:
             if c == value:
                 return pos
             pos += 1
-
     def getProbability(self, perm):
         # Discard the var's value
         # Utilize only the parent's values
@@ -37,9 +34,6 @@ class Node:
                 return prob[1][0]       # Return the probability of the var being True, given the permutation
 
         return -1
-
-    def isRoot(self):
-        return len(self.parent) == 0
 
 
 def debug(nodes):

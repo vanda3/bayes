@@ -8,7 +8,7 @@ def core(nodes, names, q, e, flag, debug):
     for key, value in nodes[q].probs.items():
         print(key, nodes[q].classes, value)
 
-    order = elimOrder(nodes, names)
+    order = elimOrder(nodes, names, q, e)
     factors = init_factors(nodes, order, q, e)
     for var in order:
         for f in nodes[var].factor:
@@ -51,13 +51,12 @@ def process_query(var, perm, nodes):
     """
 
     # The variable has no parents. Just return the probability it has set for that evidence value.
-    if len(nodes[var].parent) == 0:
+    if nodes[var].isRoot():
         query_values = (literal_eval(nodes[var].probs[0]), nodes[var].probs[1][0])
     # The variable has parents. Query its probability
     else:
         prob = nodes[var].getProbability(perm)      # Get the probability
         query_values = (str(perm), prob)
-
     # print(query_values)
     return query_values
 
@@ -138,7 +137,7 @@ def init_factors(nodes, order, q, e):
 
 
 # Determines variable topological elimination order
-def elimOrder(nodes, names):
+def elimOrder(nodes, names, q, e):
     order = []
     nxt = []
     # parents of a node go before node
@@ -150,7 +149,9 @@ def elimOrder(nodes, names):
                 if p not in order:
                     order += [p]
             order += [n]
-
+    order.remove(q)
+    for v,k in e.items():
+        order.remove(v)
     return order
 
 
