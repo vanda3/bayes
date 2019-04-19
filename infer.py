@@ -75,10 +75,17 @@ def make_factor(nodes, var, factor_vars, e):
         for key, value in e.items():
             if key in perm.keys():
                 if perm[key] != value:
+                    # Remove the permutations that don't match the evidence
                     perms.remove(perm)
+                else:
+                    # Remove the evidence from the permutations that match it
+                    perms[perms.index(perm)].pop(key)
+                    continue
 
-    print("Permutations of " + var + ":\n" + str(perms))
-
+    # Calculate probability for each permutation
+    for perm in perms:
+        continue
+        
     # To be continued...
     return
 
