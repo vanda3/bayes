@@ -73,7 +73,7 @@ def make_factor(nodes, var, e):
     all_vars = []
     for parent in nodes[var].parent:
         all_vars.append(parent)
-    # all_vars.append(var)               # All variables involved in the factor, including the evidence
+    all_vars.append(var)               # All variables involved in the factor, including the evidence
 
     # Generate the permutations (Need all the possible values of the variables)
     perms = gen_perms(all_vars)
@@ -191,7 +191,7 @@ def init_factors(nodes, order, q, e):
         i += 1      # This is just so that the loop stops. It isn't a part of the code
         # To be continued...
 
-    # print(factors)
+    print(factors)
 
     return factors
 

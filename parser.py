@@ -1,5 +1,6 @@
 import re
 from ast import literal_eval
+from copy import deepcopy
 
 class Node:
     def __init__(self, name):
@@ -29,9 +30,16 @@ class Node:
     def getProbability(self, perm):
         # Discard the var's value
         # Utilize only the parent's values
+        # print("PERM: " + str(perm))
+        # print("VAR: " + self.name)
+        # print(self.probs)
+        perm_to_compare = deepcopy(perm)
+        perm_to_compare.pop(self.name)
         for prob in self.probs.items():
-            if literal_eval(prob[0]) == perm:
-                return prob[1][0]       # Return the probability of the var being True, given the permutation
+            if literal_eval(prob[0]) == perm_to_compare:
+                for i, clas in enumerate(self.classes):
+                    if perm[self.name] == clas:
+                        return prob[1][i]       # Return the probability of the var, given the permutation
 
         return -1
 
