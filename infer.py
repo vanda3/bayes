@@ -29,11 +29,13 @@ def gen_perms(vars):
                 perms.append({var: value})
         else:
             classes = nodes[var].classes
+            old_perms = perms
             for i in range(1, len(classes)):
-                perms = perms + deepcopy(perms)
+                perms = perms + deepcopy(old_perms)
 
-            for i in range(0, len(perms)):
-                perms[i][var] = classes[i // len(classes)]
+            for i in range(0, int(len(perms) / len(classes))):
+                for j in range(0, len(classes)):
+                    perms[i + j * int(len(perms) / len(classes))][var] = classes[j]
 
     return perms
 
@@ -54,7 +56,7 @@ def make_factor(nodes, var, factor_vars, e):
     all_vars.append(var)               # All variables involved in the factor, including the evidence
 
     # Generate the permutations (Need all the possible values of the variables)
-    perms = gen_perms(factor_vars)
+    perms = gen_perms(all_vars)
     print("Permutations for " + var + "\n" + str(perms))
 
     # To be continued...
