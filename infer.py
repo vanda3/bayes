@@ -152,11 +152,12 @@ def sum_out(nodes, var, factors):
     # If the only value that changed in a permutation is the value of
     # the variable we are eliminating, sum the probabilities of those permutations
     # i.e:
-    #   A   B   Prob            Eliminating A:      B   Prob
-    #   T   T   0.5                                 T   0.6 (0.5 + 0.1)
-    #   T   F   0.3                                 F   0.4 (0.3 + 0.1)
-    #   F   T   0.1
-    #   F   F   0.1
+    #   C   X   Prob            Eliminating C:      X   Prob
+    #   T   p   0.9                                 p   1.1 (0.9 + 0.2)
+    #   T   n   0.1                                 n   0.9 (0.1 + 0.8)
+    #   F   p   0.2
+    #   F   n   0.8
+    # We need to normalize the probabilities (divide each by the total of the sum)
 
     # Replace the old factor by this new one
 
@@ -185,13 +186,12 @@ def init_factors(nodes, order, q, e):
         if len(factor_vars) > 0:
             factors.append(make_factor(nodes, order[i], e))
 
-        if order[i] != q:
-            factors = sum_out(nodes, order[i], factors)
+        factors = sum_out(nodes, order[i], factors)
 
         i += 1      # This is just so that the loop stops. It isn't a part of the code
         # To be continued...
 
-    print(factors)
+    # print(factors)
 
     return factors
 
