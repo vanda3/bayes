@@ -104,6 +104,66 @@ def make_factor(nodes, var, e):
     return probabilities
 
 
+def check_var_in_value(var, value):
+    """
+    :param var:         The queried var
+    :param value:       List of tuples (permutation, probability)
+    :return:            True, if var is in the permutation; false, otherwise
+    """
+    for val in value:
+        if var in literal_eval(val[0]).keys():
+            return True
+    return False
+
+
+def product(nodes, var, factorA, factorB):
+    return 0
+
+
+def sum_out(nodes, var, factors):
+    """
+    Sum out factors, based on var
+    :param nodes:       The network
+    :param var:         The var to remove
+    :param factors:     List of factors in form of ({'var': [entries]})
+    :return:            List of new factors
+    """
+
+    factors_with_var = []
+    indices_to_remove = []
+    for i, factor in enumerate(factors):
+        for _, value in factor.items():
+            if check_var_in_value(var, value):
+                factors_with_var.append(factor)
+                indices_to_remove.append(i)
+
+    if len(factors_with_var) > 1:
+        for i in reversed(indices_to_remove):
+            del factors[i]
+
+        result = factors_with_var[0]
+        for factor in factors_with_var[1:]:
+            result = product(nodes, var, result, factor)
+        factors.append(result)
+
+    # SUM-OUT OPERATION
+    # For each factor:
+    # Calculate the table of the new factor
+
+    # If the only value that changed in a permutation is the value of
+    # the variable we are eliminating, sum the probabilities of those permutations
+    # i.e:
+    #   A   B   Prob            Eliminating A:      B   Prob
+    #   T   T   0.5                                 T   0.6 (0.5 + 0.1)
+    #   T   F   0.3                                 F   0.4 (0.3 + 0.1)
+    #   F   T   0.1
+    #   F   F   0.1
+
+    # Replace the old factor by this new one
+
+    return factors
+
+
 def init_factors(nodes, order, q, e):
     elimd = []
     factors = []
@@ -122,17 +182,17 @@ def init_factors(nodes, order, q, e):
         # list, containing the unknown variables of the factor to be created
         factor_vars = [parent for parent in nodes[order[i]].parent if parent not in e.keys()]
 
-        print("Factor vars of " + order[i] + ": " + str(factor_vars))
-
         # make the factor
         if len(factor_vars) > 0:
             factors.append(make_factor(nodes, order[i], e))
 
-        print()
+        if order[i] != q:
+            factors = sum_out(nodes, order[i], factors)
+
         i += 1      # This is just so that the loop stops. It isn't a part of the code
         # To be continued...
 
-    print(factors)
+    # print(factors)
 
     return factors
 
