@@ -1,4 +1,5 @@
 from parser import parser, debug, queryParser
+from copy import deepcopy
 
 
 # Core Algorithm
@@ -20,17 +21,19 @@ def gen_perms(vars):
     :return: A list of the possible permutations
     """
 
-    perms = []
-
     # For all possible values of all vars, create a permutation and add it to the list
-    # i.e:
-    #
-    # perm = [{'Pollution': 'high', 'Smoker': 'True'}, {'Pollution': 'high', 'Smoker': 'False'},
-    #         {'Pollution': 'low', 'Smoker': 'True}, {'Pollution': 'low', 'Smoker': 'False'}]
-    # perms.append(perm)
-    #
-    # Problem: Not all vars have the same possible values (Not all vars are 'True' and 'False'.
-    #          How do we create permutations of that?
+    perms = []
+    for var in vars:
+        if len(perms) == 0:
+            for value in nodes[var].classes:
+                perms.append({var: value})
+        else:
+            classes = nodes[var].classes
+            for i in range(1, len(classes)):
+                perms = perms + deepcopy(perms)
+
+            for i in range(0, len(perms)):
+                perms[i][var] = classes[i // len(classes)]
 
     return perms
 
@@ -52,6 +55,7 @@ def make_factor(nodes, var, factor_vars, e):
 
     # Generate the permutations (Need all the possible values of the variables)
     perms = gen_perms(factor_vars)
+    print("Permutations for " + var + "\n" + str(perms))
 
     # To be continued...
 
@@ -62,20 +66,28 @@ def init_factors(nodes, order, q, e):
     elimd = []
     factors = []
     i = 0
+    print()
     while len(elimd) != len(order):
+        if i == len(order):
+            break
+
         # filter vars that were eliminated
         variables = filter(lambda var: var not in elimd, list(nodes.keys()))
 
         # filter vars that have children yet not eliminated
-        variables = filter(lambda var: all(child in elimd for child in nodes[var].child), variables)
+        # variables = filter(lambda var: all(child in elimd for child in nodes[var].child), variables)
 
         # list, containing the unknown variables of the factor to be created
         factor_vars = [parent for parent in nodes[order[i]].parent if parent not in e]
+
+        print("Factor vars of " + order[i] + ": " + str(factor_vars))
 
         # make the factor
         if len(factor_vars) > 0:  # Is this really needed?
             factors.append(make_factor(nodes, order[i], factor_vars, e))
 
+        print()
+        i += 1      # This is just so that the loop stops. It isn't a part of the code
         # To be continued...
 
     return factors
