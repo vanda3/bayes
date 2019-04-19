@@ -30,9 +30,6 @@ class Node:
     def getProbability(self, perm):
         # Discard the var's value
         # Utilize only the parent's values
-        # print("PERM: " + str(perm))
-        # print("VAR: " + self.name)
-        # print(self.probs)
         perm_to_compare = deepcopy(perm)
         perm_to_compare.pop(self.name)
         for prob in self.probs.items():
