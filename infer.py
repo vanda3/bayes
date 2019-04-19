@@ -128,6 +128,7 @@ def sum_out(nodes, var, factors):
     :return:            List of new factors
     """
 
+    print()
     factors_with_var = []
     indices_to_remove = []
     for i, factor in enumerate(factors):
@@ -158,6 +159,25 @@ def sum_out(nodes, var, factors):
     #   F   p   0.2
     #   F   n   0.8
     # We need to normalize the probabilities (divide each by the total of the sum)
+    for i, factor in enumerate(factors):
+        # Get the tuple (permutation, probability)
+        for _, lst in factor.items():
+            for tup in lst:
+                print(tup)
+                perm = literal_eval(tup[0])
+                for v in perm.keys():
+                    if v == var:
+                        # Calculate the probabilities
+                        var_probabilities = {}  # Dict of tuples (remaining_perm, probability)
+
+                        # The "remaining perm" is the perm without the var we are summing out
+
+                        # Search for the "remaining perm" in the tuples of the list
+                        # Sum the values of the probabilities on the cases
+                        # where the "remaining perm" matches
+                        continue
+
+        continue
 
     # Replace the old factor by this new one
 
