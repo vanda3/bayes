@@ -1,5 +1,5 @@
 import re
-
+from ast import literal_eval
 
 class Node:
     def __init__(self, name):
@@ -28,6 +28,15 @@ class Node:
             if c == value:
                 return pos
             pos += 1
+
+    def getProbability(self, perm):
+        # Discard the var's value
+        # Utilize only the parent's values
+        for prob in self.probs.items():
+            if literal_eval(prob[0]) == perm:
+                return prob[1][0]       # Return the probability of the var being True, given the permutation
+
+        return -1
 
     def isRoot(self):
         return len(self.parent) == 0

@@ -1,5 +1,6 @@
 from parser import parser, debug, queryParser
 from copy import deepcopy
+from ast import literal_eval
 
 
 # Core Algorithm
@@ -40,15 +41,19 @@ def gen_perms(vars):
     return perms
 
 
-def process_query(var, e, nodes):
+def process_query(var, perm, nodes):
+    query_values = {}
+
     # The variable has no parents. Just return the probability it has set for that evidence value.
     if len(nodes[var].parent) == 0:
-        probability = 0
+        query_values[literal_eval(nodes[var].probs[0])] = nodes[var].probs[1][0]
     # The variable has parents. Query its probability
     else:
-        probability = 0
+        prob = nodes[var].getProbability(perm)
+        query_values[str(perm)] = prob        # Get the probability
 
-    return probability
+    print(query_values)
+    return query_values
 
 
 def make_factor(nodes, var, factor_vars, e):
@@ -64,7 +69,7 @@ def make_factor(nodes, var, factor_vars, e):
     all_vars = []
     for parent in nodes[var].parent:
         all_vars.append(parent)
-    all_vars.append(var)               # All variables involved in the factor, including the evidence
+    # all_vars.append(var)               # All variables involved in the factor, including the evidence
 
     # Generate the permutations (Need all the possible values of the variables)
     perms = gen_perms(all_vars)
@@ -79,13 +84,15 @@ def make_factor(nodes, var, factor_vars, e):
                     perms.remove(perm)
                 else:
                     # Remove the evidence from the permutations that match it
-                    perms[perms.index(perm)].pop(key)
+                    # perms[perms.index(perm)].pop(key)
                     continue
 
     # Calculate probability for each permutation
+    probabilities = {}
     for perm in perms:
-        continue
-        
+        prob = process_query(var, perm, nodes)
+        probabilities[frozenset(perm)] = prob
+
     # To be continued...
     return
 
