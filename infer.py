@@ -40,6 +40,17 @@ def gen_perms(vars):
     return perms
 
 
+def process_query(var, e, nodes):
+    # The variable has no parents. Just return the probability it has set for that evidence value.
+    if len(nodes[var].parent) == 0:
+        probability = 0
+    # The variable has parents. Query its probability
+    else:
+        probability = 0
+
+    return probability
+
+
 def make_factor(nodes, var, factor_vars, e):
     """
     Create a factor
@@ -57,10 +68,17 @@ def make_factor(nodes, var, factor_vars, e):
 
     # Generate the permutations (Need all the possible values of the variables)
     perms = gen_perms(all_vars)
-    print("Permutations for " + var + "\n" + str(perms))
+    print("Permutations of " + var + ":\n" + str(perms))
+
+    # Filter out permutations not in accord with the evidence
+    old_perms = deepcopy(perms)
+    for perm in old_perms:
+        for key, value in e.items():
+            if key in perm.keys():
+                if perm[key] == value:
+                    perms.remove(perm)
 
     # To be continued...
-
     return
 
 
@@ -85,7 +103,7 @@ def init_factors(nodes, order, q, e):
         print("Factor vars of " + order[i] + ": " + str(factor_vars))
 
         # make the factor
-        if len(factor_vars) > 0:  # Is this really needed?
+        if len(factor_vars) > 0:
             factors.append(make_factor(nodes, order[i], factor_vars, e))
 
         print()
@@ -93,6 +111,7 @@ def init_factors(nodes, order, q, e):
         # To be continued...
 
     return factors
+
 
 # Determines variable topological elimination order
 def elimOrder(nodes, names):

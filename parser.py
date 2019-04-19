@@ -123,8 +123,7 @@ def parser(name):
 
 
 def queryParser(q):
-    e = []
-    dicti = {}
+    e = {}
     occur = q.count('|')
     flag = 0
     if occur == 0:
@@ -137,11 +136,10 @@ def queryParser(q):
             try:
                 # To remove all whitespaces and split the key, value
                 attrib = "".join(tmp[1].split()).split('=')
-                dicti[attrib[0]] = attrib[1]
+                e[attrib[0]] = attrib[1]
             except IndexError:
                 print("You have to attribute a value to the evidence")
                 return q, e, flag, -1
-                # e.append(tmp[1].strip())
             finally:
                 flag = 2
         else:
@@ -150,16 +148,14 @@ def queryParser(q):
                 try:
                     # To remove all whitespaces and split the key, value
                     attrib = "".join(ev.split()).split('=')
-                    dicti[attrib[0]] = attrib[1]
-                    # e.append(ev.strip())
+                    e[attrib[0]] = attrib[1]
                 except IndexError:
                     print("You have to attribute a value to the evidence")
                     return q, e, flag, -1
-                    # e.append(tmp[1].strip())
                 finally:
                     flag = 2
 
-    print("Query:", q, " Evidence:", dicti, "Flag:", flag)
+    print("Query:", q, " Evidence:", e, "Flag:", flag)
 
     # Execution went OK
     return q, e, flag, 0
