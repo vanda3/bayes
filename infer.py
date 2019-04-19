@@ -68,15 +68,16 @@ def make_factor(nodes, var, factor_vars, e):
 
     # Generate the permutations (Need all the possible values of the variables)
     perms = gen_perms(all_vars)
-    print("Permutations of " + var + ":\n" + str(perms))
 
     # Filter out permutations not in accord with the evidence
     old_perms = deepcopy(perms)
     for perm in old_perms:
         for key, value in e.items():
             if key in perm.keys():
-                if perm[key] == value:
+                if perm[key] != value:
                     perms.remove(perm)
+
+    print("Permutations of " + var + ":\n" + str(perms))
 
     # To be continued...
     return
@@ -98,7 +99,7 @@ def init_factors(nodes, order, q, e):
         # variables = filter(lambda var: all(child in elimd for child in nodes[var].child), variables)
 
         # list, containing the unknown variables of the factor to be created
-        factor_vars = [parent for parent in nodes[order[i]].parent if parent not in e]
+        factor_vars = [parent for parent in nodes[order[i]].parent if parent not in e.keys()]
 
         print("Factor vars of " + order[i] + ": " + str(factor_vars))
 
