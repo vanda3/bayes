@@ -2,6 +2,27 @@ import re
 from ast import literal_eval
 from copy import deepcopy
 
+
+def dict_to_tuple(dictionary):
+    vars = []
+    values = []
+    for key, value in dictionary.items():
+        vars.append(key)
+        values.append(value)
+
+    return str(vars), str(values)
+
+
+def tuple_to_dict(tup):
+    dictionary = {}
+    lst_vars = literal_eval(tup[0])
+    lst_values = literal_eval(tup[1])
+    for i, _ in enumerate(lst_vars):
+        dictionary[lst_vars[i]] = lst_values[i]
+
+    return dictionary
+
+
 class Node:
     def __init__(self, name):
         self.name = name
@@ -27,6 +48,19 @@ class Node:
             if c == value:
                 return pos
             pos += 1
+    def getProbability2(self, perm):
+        dictionary = tuple_to_dict(perm)
+
+        perm_to_compare = deepcopy(dictionary)
+        perm_to_compare.pop(self.name)
+        for prob in self.probs.items():
+            if literal_eval(prob[0]) == perm_to_compare:
+                for i, clas in enumerate(self.classes):
+                    if dictionary[self.name] == clas:
+                        return prob[1][i]       # Return the probability of the var, given the permutation
+
+        return -1
+
     def getProbability(self, perm):
         # Discard the var's value
         # Utilize only the parent's values
@@ -39,7 +73,6 @@ class Node:
                         return prob[1][i]       # Return the probability of the var, given the permutation
 
         return -1
-
 
 def debug(nodes):
     print()
