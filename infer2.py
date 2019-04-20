@@ -246,9 +246,6 @@ def init_factors(nodes, order, q, e):
         elimd.add(var_to_elim)
         i += 1  # Not a part of the code
 
-    print("FACTORS:")
-    print(factors)
-
     if len(factors) >= 2:
         result = factors[0]
         for factor in factors[1:]:
@@ -256,23 +253,24 @@ def init_factors(nodes, order, q, e):
     else:
         result = factors[0]
 
-    print("RESULT:")
-    print(result)
-
-    result = normalize_factor(result, q)
+    result = normalize_factor(nodes, result, q)
 
     return result
 
 
-def normalize_factor(factor, q):
+def normalize_factor(nodes, factor, q):
     sum_probs = sum(factor[1].values())
-    q_prob = 0
+    probs = []
     for tup, prob in factor[1].items():
         dit = tuple_to_dict(tup)
-        if dit[q] == "True":
-            q_prob = prob
+        for clas in nodes[q].classes:
+            if dit[q] == clas:
+                if len(probs) == 0:
+                    probs = [(clas, prob / sum_probs)]
+                else:
+                    probs.append((clas, prob / sum_probs))
 
-    return q_prob / sum_probs
+    return probs
 
 # Determines variable topological elimination order
 def elimOrder(nodes, names, q, e):
