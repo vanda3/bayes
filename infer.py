@@ -15,7 +15,7 @@ def core(nodes, names, q, e, flag, debug):
             pass
 
 
-def gen_perms(vars):
+def gen_perms(vars,nodes):
     """
     Generate the permutations
     :param vars: A list of the variables we want to permutate
@@ -76,7 +76,7 @@ def make_factor(nodes, var, e):
     all_vars.append(var)               # All variables involved in the factor, including the evidence
 
     # Generate the permutations (Need all the possible values of the variables)
-    perms = gen_perms(all_vars)
+    perms = gen_perms(all_vars,nodes)
 
     # Filter out permutations not in accord with the evidence
     old_perms = deepcopy(perms)
@@ -290,7 +290,7 @@ if __name__ == "__main__":
                     print("Available variables: ", names)
                     f = -1
                 if e[ev] not in nodes[ev].classes:
-                    print("Error. ", e[ev], " isn't a valid value.")
+                    print("Error. ", e[ev], " isn't valid.")
                     print("Available values for variable ",ev,": ",nodes[ev].classes,".")
                     f= -1
         if f == -1:
