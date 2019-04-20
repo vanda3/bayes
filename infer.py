@@ -252,18 +252,19 @@ def init_factors(nodes, order, q, e):
 def elimOrder(nodes, names, q, e):
     order = []
     nxt = []
+    unav = [q]
+    for k in e.keys():
+        unav.append(k)
     # parents of a node go before node
     for n in names:
-        if len(order) == 0:
-            order = nodes[n].parent + [n]
-        else:
-            for p in nodes[n].parent:
-                if p not in order:
-                    order += [p]
-            order += [n]
-    order.remove(q)
-    for v,k in e.items():
-        order.remove(v)
+        if n not in unav:
+            if len(order) == 0:
+                order = nodes[n].parent + [n]
+            else:
+                for p in nodes[n].parent:
+                    if p not in order and p not in unav:
+                        order += [p]
+                order += [n]
     return order
 
 
@@ -276,21 +277,26 @@ if __name__ == "__main__":
     print("Available Variables: ", names)
     print("Pr? ", end='')
     query = str(input())
-    q, e, flag, f = queryParser(query)
+    q, e, flag, f = queryParser(query, nodes)
     while True:
         if q not in names:
-            print("Error, ", q, " not available.")
+            print("Error. ", q, " not available.")
+            print("Available variables: ", names)
             f = -1
         else:
             for ev in e:
                 if ev not in names:
-                    print("Error, ", ev, " not available.")
+                    print("Error. ", ev, " not available.")
+                    print("Available variables: ", names)
                     f = -1
+                if e[ev] not in nodes[ev].classes:
+                    print("Error. ", e[ev], " isn't a valid value.")
+                    print("Available values for variable ",ev,": ",nodes[ev].classes,".")
+                    f= -1
         if f == -1:
-            print("Available variables: ", names)
             print("Try again. Pr? ", end='')
             query = str(input())
-            q, e, flag, f = queryParser(query)
+            q, e, flag, f = queryParser(query, nodes)
         else:
             break
 

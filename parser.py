@@ -130,7 +130,7 @@ def parser(name):
     return nodes, names
 
 
-def queryParser(q):
+def queryParser(q, nodes):
     e = {}
     occur = q.count('|')
     flag = 0
@@ -146,7 +146,8 @@ def queryParser(q):
                 attrib = "".join(tmp[1].split()).split('=')
                 e[attrib[0]] = attrib[1]
             except IndexError:
-                print("You have to attribute a value to the evidence")
+                print("Error. Evidence needs a value.")
+                print("Available values for variable ",attrib[0],": ",nodes[attrib[0]].classes,".")
                 return q, e, flag, -1
             finally:
                 flag = 2
@@ -158,7 +159,8 @@ def queryParser(q):
                     attrib = "".join(ev.split()).split('=')
                     e[attrib[0]] = attrib[1]
                 except IndexError:
-                    print("You have to attribute a value to the evidence")
+                    print("Error. Evidence needs a value.")
+                    print("Available values for variable ",attrib[0],": ",nodes[attrib[0]].classes,".")
                     return q, e, flag, -1
                 finally:
                     flag = 2
