@@ -61,14 +61,17 @@ def process_query(var, perm, nodes):
     return query_values
 
 
-def make_factor(nodes, var, e):
+def make_factor(nodes, var, factor_vars, e):
     """
     Create a factor
-    :param nodes:           The network
+    :param nodes:           The network.
     :param var:             The selected variable's name.
-    :param e:               Dictionary of the evidence
+    :param factor_vars:     The vars in the factor.
+    :param e:               Dictionary of the evidence.
     :return:                A list of the probabilities for the possible permutations
     """
+
+    print(factor_vars)
 
     all_vars = []
     for parent in nodes[var].parent:
@@ -115,7 +118,43 @@ def check_var_in_value(var, value):
     return False
 
 
-def product(nodes, var, factorA, factorB):
+def product(nodes, factorA, factorB):
+    vars = []
+
+    for _, lst in factorA.items():
+        for tup, _ in lst:
+            # Gets the variables used in the factor
+            dit = literal_eval(tup)
+            for key, _ in dit.items():
+                if key not in vars:
+                    if len(vars) == 0:
+                        vars = [key]
+                    else:
+                        vars.append(key)
+
+    perms = gen_perms(vars)
+
+    # Calculate the new probabilities
+    print("PERMS: " + str(perms))
+    print(factorA)
+    print(factorB)
+    for perm in perms:
+        # To be continued...
+        continue
+    """
+    newtable = {}
+    asg = {}
+    for perm in perms:
+        for pair in zip(newvariables, perm):
+            asg[pair[0]] = pair[1]
+        key = tuple(asg[v] for v in newvariables)
+        key1 = tuple(asg[v] for v in factor1[0])
+        key2 = tuple(asg[v] for v in factor2[0])
+        prob = factor1[1][key1] * factor2[1][key2]
+        newtable[key] = prob
+
+    return (newvariables, newtable)
+    """
     return 0
 
 
@@ -124,13 +163,14 @@ def sum_out(nodes, var, factors):
     Sum out factors, based on var
     :param nodes:       The network
     :param var:         The var to remove
-    :param factors:     List of factors in form of ({'var': [entries]})
-    :return:            List of new factors
+    :param factors:     List of factors in form of {'var': [("perm", prob)]}
+    :return:            List of new factors in form of {'var': [("perm", prob, elimd_var)]
     """
 
     print()
     factors_with_var = []
     indices_to_remove = []
+
     for i, factor in enumerate(factors):
         for _, value in factor.items():
             if check_var_in_value(var, value):
@@ -143,7 +183,7 @@ def sum_out(nodes, var, factors):
 
         result = factors_with_var[0]
         for factor in factors_with_var[1:]:
-            result = product(nodes, var, result, factor)
+            result = product(nodes, result, factor)
         factors.append(result)
 
     # SUM-OUT OPERATION
@@ -205,13 +245,10 @@ def sum_out(nodes, var, factors):
                                 final_probabilities.append(tup)
 
     # TODO: We still need to normalize the probabilities
-    # Swap the list of the factor by the list final_probabilities
+    # Swap the list of the factor by the list final_probabilities, adding the elimd var
     for item in factors:
-        # print(item)
         if var in item.keys():
             item[var] = final_probabilities
-
-    print(factors)
 
     return factors
 
@@ -220,10 +257,11 @@ def init_factors(nodes, order, q, e):
     elimd = []
     factors = []
     i = 0
-    print()
     while len(elimd) != len(order):
         if i == len(order):
             break
+
+        print("Eliminating " + order[i])
 
         # filter vars that were eliminated
         variables = filter(lambda var: var not in elimd, list(nodes.keys()))
@@ -236,14 +274,38 @@ def init_factors(nodes, order, q, e):
 
         # make the factor
         if len(factor_vars) > 0:
-            factors.append(make_factor(nodes, order[i], e))
+            factors.append(make_factor(nodes, order[i], factor_vars, e))
 
         factors = sum_out(nodes, order[i], factors)
 
-        i += 1      # This is just so that the loop stops. It isn't a part of the code
-        # To be continued...
+        if len(elimd) == 0:
+            elimd = [order[i]]
+        else:
+            elimd.append(order[i])
 
-    # print(factors)
+        for factor in factors:
+            # Just a context switch
+            used_vars = []
+            for _, lst in factor.items():
+                for tup, _ in lst:
+                    # Gets the variables used in the factor
+                    dit = literal_eval(tup)
+                    for key, _ in dit.items():
+                        if key not in used_vars:
+                            if len(used_vars) == 0:
+                                used_vars = [key]
+                            else:
+                                used_vars.append(key)
+        i += 1
+
+    if len(factors) >= 2:
+        result = factors[0]
+        for factor in factors[1:]:
+            result = product(nodes, result, factor)
+    else:
+        result = factors[0]
+
+    print(result)
 
     return factors
 
