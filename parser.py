@@ -201,4 +201,4 @@ def queryParser(q, nodes):
     print("Query:", q, " Evidence:", e, "Flag:", flag)
 
     # Execution went OK
-    return q, e, flag, 0
+    return q, e, 0

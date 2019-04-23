@@ -4,17 +4,14 @@ from ast import literal_eval
 
 
 # Core Algorithm
-def core(nodes, names, q, e, flag, debug):
-    for key, value in nodes[q].probs.items():
-        print(key, nodes[q].classes, value)
-
-    order = elimOrder(nodes, names, q, e)
-    result = init_factors(nodes, order, q, e)
-
-    print(result)
+def core(nodes, names, q, e, debug):
+    result = init_factors(nodes, q, e, 1)
+    print("R1:",result)
+    result2 = init_factors(nodes, q, e, 2)
+    print("R2:",result2)
 
 
-def gen_perms(vars):
+def gen_perms(vars,nodes):
     """
     Generates all possible permutations of the given variables
     :param vars:        The variables to permutate
@@ -61,14 +58,14 @@ def process_query(nodes, var, perm):
     else:
         return nodes[var].getProbability2(perm)      # Get the probability
 
-
+# Generates valid permutations of values for factors
 def make_factor(nodes, var, factor_vars, e):
     factor_vars.sort()
 
     all_vars = deepcopy(nodes[var].parent)
     all_vars.append(var)
 
-    perms = gen_perms(all_vars)
+    perms = gen_perms(all_vars,nodes)
 
     # Filter out permutations not in accord with the evidence
     perms = filter_perms(perms, e)
@@ -81,7 +78,7 @@ def make_factor(nodes, var, factor_vars, e):
 
     return factor_vars, probabilities
 
-
+# Removes unecessary values from table
 def filter_perms(perms, e):
     old_perms = deepcopy(perms)
     for perm in old_perms:
@@ -105,7 +102,7 @@ def product(factorA, factorB, e):
 
     # Eliminate repeated variables
     vars = list(set(vars))
-    perms = gen_perms(vars)
+    perms = gen_perms(vars,nodes)
 
     # Remove the perms that don't match the evidence
     perms = filter_perms(perms, e)
@@ -217,16 +214,17 @@ def sum_out(var, factors, e):
                     del factors[i]
     return factors
 
-def init_factors(nodes, order, q, e):
+def init_factors(nodes, q, e, flag):
     elimd = set()
     factors = []
 
     i = 0
     while i < len(nodes):
         vars = filter(lambda var: var not in elimd, list(nodes.keys()))
-
-        vars = filter(lambda var: all(child in elimd for child in nodes[var].child), vars)
-
+        if flag==1:
+            vars = filter(lambda var: all(parent in elimd for parent in nodes[var].parent), vars)
+        else:
+            vars = filter(lambda var: all(child in elimd for child in nodes[var].child), vars)
         factor_vars = {}
         for var in vars:
             factor_vars[var] = [par for par in nodes[var].parent if par not in e]
@@ -251,6 +249,7 @@ def init_factors(nodes, order, q, e):
             result = product(result, factor, e)
     else:
         result = factors[0]
+
     result = normalize_factor(nodes, result, q)
 
     return result
@@ -259,35 +258,21 @@ def init_factors(nodes, order, q, e):
 def normalize_factor(nodes, factor, q):
     sum_probs = sum(factor[1].values())
     probs = []
+    probs_dict={}
     for tup, prob in factor[1].items():
         dit = tuple_to_dict(tup)
         for clas in nodes[q].classes:
             if dit[q] == clas:
-                if len(probs) == 0:
-                    probs = [(clas, prob / sum_probs)]
+                if clas in probs_dict:
+                    probs_dict[clas]+=prob
                 else:
-                    probs.append((clas, prob / sum_probs))
-
+                    probs_dict[clas]=prob
+    for clas, prob in probs_dict.items():
+        if len(probs)==0:
+            probs=[(clas,prob/sum_probs)]
+        else:
+            probs.append((clas,prob/sum_probs))
     return probs
-
-# Determines variable topological elimination order
-def elimOrder(nodes, names, q, e):
-    order = []
-    nxt = []
-    unav = [q]
-    for k in e.keys():
-        unav.append(k)
-    # parents of a node go before node
-    for n in names:
-        if n not in unav:
-            if len(order) == 0:
-                order = nodes[n].parent + [n]
-            else:
-                for p in nodes[n].parent:
-                    if p not in order and p not in unav:
-                        order += [p]
-                order += [n]
-    return order
 
 
 if __name__ == "__main__":
@@ -299,7 +284,7 @@ if __name__ == "__main__":
     print("Available Variables: ", names)
     print("Pr? ", end='')
     query = str(input())
-    q, e, flag, f = queryParser(query,nodes)
+    q, e, f = queryParser(query,nodes)
     while True:
         if q not in names:
             print("Error. ", q, " not available.")
@@ -320,8 +305,8 @@ if __name__ == "__main__":
         if f == -1:
             print("Try again. Pr? ", end='')
             query = str(input())
-            q, e, flag, f = queryParser(query, nodes)
+            q, e, f = queryParser(query, nodes)
         else:
             break
 
-    core(nodes, names, q, e, flag, True)
+    core(nodes, names, q, e, True)
