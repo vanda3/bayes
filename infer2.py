@@ -215,7 +215,6 @@ def sum_out(var, factors, e):
                 factors[i] = (new_vars, var_probs)
                 if len(new_vars) == 0:
                     del factors[i]
-
     return factors
 
 def init_factors(nodes, order, q, e):
@@ -252,7 +251,6 @@ def init_factors(nodes, order, q, e):
             result = product(result, factor, e)
     else:
         result = factors[0]
-
     result = normalize_factor(nodes, result, q)
 
     return result
@@ -308,15 +306,17 @@ if __name__ == "__main__":
             print("Available variables: ", names)
             f = -1
         else:
-            for ev in e:
+            for ev in e.keys():
                 if ev not in names:
                     print("Error. ", ev, " not available.")
                     print("Available variables: ", names)
                     f = -1
-                if e[ev] not in nodes[ev].classes:
+                elif e[ev] not in nodes[ev].classes:
                     print("Error. ", e[ev], " isn't valid.")
                     print("Available values for variable ",ev,": ",nodes[ev].classes,".")
                     f= -1
+                else:
+                    pass
         if f == -1:
             print("Try again. Pr? ", end='')
             query = str(input())
