@@ -3,6 +3,38 @@ from ast import literal_eval
 from copy import deepcopy
 
 
+class Node:
+    def __init__(self, name):
+        self.name = name
+        self.classes = []
+        self.parent = []
+        self.child = []
+        self.probs = {}
+        self.cardinal=0
+    def addProb(self, values, prob):
+        self.probs[repr(values)] = prob
+    def isRoot(self):
+        return len(self.parent) == 0
+    def addParent(self, parent):
+        self.parent.append(parent)
+        self.cardinal+=1
+    def addChild(self, child):
+        self.child.append(child)
+        self.cardinal+=1
+    def getProbability(self, perm):
+        dictionary = tuple_to_dict(perm)
+
+        perm_to_compare = deepcopy(dictionary)
+        perm_to_compare.pop(self.name)
+        for prob in self.probs.items():
+            if literal_eval(prob[0]) == perm_to_compare:
+                for i, clas in enumerate(self.classes):
+                    if dictionary[self.name] == clas:
+                        return prob[1][i]       # Return the probability of the var, given the permutation
+
+        return -1
+
+
 def dict_to_tuple(dictionary):
     vars = []
     values = []
@@ -22,60 +54,6 @@ def tuple_to_dict(tup):
 
     return dictionary
 
-
-class Node:
-    def __init__(self, name):
-        self.name = name
-        self.classes = []
-        self.parent = []
-        self.child = []
-        self.probs = {}
-        self.values = {}
-        self.factor = [name]
-        self.cardinal=0
-    def addProb(self, values, prob):
-        self.probs[repr(values)] = prob
-        self.values = values
-    def isRoot(self):
-        return len(self.parent) == 0
-    def addParent(self, parent):
-        self.parent.append(parent)
-        self.factor.append(parent)
-        self.cardinal+=1
-    def addChild(self, child):
-        self.child.append(child)
-        self.cardinal+=1
-    def classPos(self, value):
-        pos = 0
-        for c in self.classes:
-            if c == value:
-                return pos
-            pos += 1
-    def getProbability2(self, perm):
-        dictionary = tuple_to_dict(perm)
-
-        perm_to_compare = deepcopy(dictionary)
-        perm_to_compare.pop(self.name)
-        for prob in self.probs.items():
-            if literal_eval(prob[0]) == perm_to_compare:
-                for i, clas in enumerate(self.classes):
-                    if dictionary[self.name] == clas:
-                        return prob[1][i]       # Return the probability of the var, given the permutation
-
-        return -1
-
-    def getProbability(self, perm):
-        # Discard the var's value
-        # Utilize only the parent's values
-        perm_to_compare = deepcopy(perm)
-        perm_to_compare.pop(self.name)
-        for prob in self.probs.items():
-            if literal_eval(prob[0]) == perm_to_compare:
-                for i, clas in enumerate(self.classes):
-                    if perm[self.name] == clas:
-                        return prob[1][i]       # Return the probability of the var, given the permutation
-
-        return -1
 
 def debug(nodes):
     print()

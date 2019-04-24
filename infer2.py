@@ -3,27 +3,32 @@ from copy import deepcopy
 from ast import literal_eval
 import time
 
-
+space=0
+deb=True
 
 # Core Algorithm
-def core(nodes, names, q, e, debug):
+def core(nodes, names, q, e):
+    global space
+    space=0
     start = time.time()
     result = init_factors(nodes, q, e, 1)
     end= time.time()
     print("\nTop-Down strategy:\n",result)
-    print("Time elapsed=",end-start)
+    print("Time elapsed=",end-start," Space used=",space)
     print("--------------------------------------------------")
+    space=0
     start2 = time.time()
     result2 = init_factors(nodes, q, e, 2)
     end2= time.time()
     print("\nBottom-Up strategy:\n",result2)
-    print("Time elapsed =",end2-start2)
+    print("Time elapsed =",end2-start2," Space used=",space)
     print("--------------------------------------------------")
+    space=0
     start3 = time.time()
     result3 = init_factors(nodes, q, e, 3)
     end3= time.time()
-    print("\nMost cardinality first:\n",result3)
-    print("Time elapsed =",end3-start3)
+    print("\nMost Cardinal strategy:\n",result3)
+    print("Time elapsed =",end3-start3," Space used=",space)
     print("--------------------------------------------------")
 
 
@@ -72,10 +77,12 @@ def process_query(nodes, var, perm):
         return nodes[var].probs['{}'][0]
     # The variable has parents. Query its probability
     else:
-        return nodes[var].getProbability2(perm)      # Get the probability
+        return nodes[var].getProbability(perm)      # Get the probability
 
 # Generates valid permutations of values for factors
 def make_factor(nodes, var, factor_vars, e):
+    global space
+    space+=1
     factor_vars.sort()
 
     all_vars = deepcopy(nodes[var].parent)
@@ -91,7 +98,7 @@ def make_factor(nodes, var, factor_vars, e):
     for perm in perms:
         prob = process_query(nodes, var, perm)
         probabilities[perm] = prob
-
+        
     return factor_vars, probabilities
 
 # Removes unecessary values from table
@@ -110,6 +117,8 @@ def filter_perms(perms, e):
 
 
 def product(nodes, factorA, factorB, e):
+    global space
+    space+=1
     vars = []
     vars.extend(factorA[0])
     vars.extend(factorB[0])
@@ -231,6 +240,7 @@ def sum_out(nodes, var, factors, e):
     return factors
 
 def init_factors(nodes, q, e, flag):
+    global deb
     elimd = set()
     factors = []
 
@@ -262,7 +272,8 @@ def init_factors(nodes, q, e, flag):
             factors.append(make_factor(nodes, var_to_elim, factor_vars[var_to_elim], e))
 
         if var_to_elim != q and var_to_elim not in e:
-            print("Eliminating " + var_to_elim)
+            if deb:
+                print("Eliminating " + var_to_elim)
             factors = sum_out(nodes, var_to_elim, factors, e)
 
         elimd.add(var_to_elim)
@@ -305,7 +316,8 @@ if __name__ == "__main__":
     print("Input BIF file name w/o extension")
     file = str(input())
     nodes, names = parser(file)
-    debug(nodes)
+    if deb:
+        debug(nodes)
     print("Available Variables: ", names)
     print("Pr? ", end='')
     query = str(input())
@@ -322,7 +334,7 @@ if __name__ == "__main__":
                     print("Available variables: ", names)
                     f = -1
                 elif e[ev] not in nodes[ev].classes:
-                    print("Error. ", e[ev], " isn't valid.")
+                    print("Error. '", e[ev], "' isn't valid.")
                     print("Available values for variable ",ev,": ",nodes[ev].classes,".")
                     f= -1
                 else:
@@ -334,4 +346,5 @@ if __name__ == "__main__":
         else:
             break
     print("--------------------------------------------------")
-    core(nodes, names, q, e, True)
+    print("Tamanho da rede: ",len(nodes))
+    core(nodes, names, q, e)
