@@ -32,6 +32,7 @@ class Node:
         self.probs = {}
         self.values = {}
         self.factor = [name]
+        self.cardinal=0
     def addProb(self, values, prob):
         self.probs[repr(values)] = prob
         self.values = values
@@ -40,8 +41,10 @@ class Node:
     def addParent(self, parent):
         self.parent.append(parent)
         self.factor.append(parent)
+        self.cardinal+=1
     def addChild(self, child):
         self.child.append(child)
+        self.cardinal+=1
     def classPos(self, value):
         pos = 0
         for c in self.classes:
@@ -197,8 +200,6 @@ def queryParser(q, nodes):
                     return q, e, flag, -1
                 finally:
                     flag = 2
-
-    print("Query:", q, " Evidence:", e, "Flag:", flag)
 
     # Execution went OK
     return q, e, 0

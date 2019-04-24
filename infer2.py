@@ -1,14 +1,30 @@
 from parser import parser, debug, queryParser, dict_to_tuple, tuple_to_dict
 from copy import deepcopy
 from ast import literal_eval
+import time
+
 
 
 # Core Algorithm
 def core(nodes, names, q, e, debug):
+    start = time.time()
     result = init_factors(nodes, q, e, 1)
-    print("R1:",result)
+    end= time.time()
+    print("\nTop-Down strategy:\n",result)
+    print("Time elapsed=",end-start)
+    print("--------------------------------------------------")
+    start2 = time.time()
     result2 = init_factors(nodes, q, e, 2)
-    print("R2:",result2)
+    end2= time.time()
+    print("\nBottom-Up strategy:\n",result2)
+    print("Time elapsed =",end2-start2)
+    print("--------------------------------------------------")
+    start3 = time.time()
+    result3 = init_factors(nodes, q, e, 3)
+    end3= time.time()
+    print("\nMost cardinality first:\n",result3)
+    print("Time elapsed =",end3-start3)
+    print("--------------------------------------------------")
 
 
 def gen_perms(vars,nodes):
@@ -86,14 +102,14 @@ def filter_perms(perms, e):
             lst_vars = literal_eval(perm[0])
             lst_values = literal_eval(perm[1])
             for i, _ in enumerate(lst_vars):
-                if (lst_vars[i] == key) & (lst_values[i] != value):
+                if perm in perms and (lst_vars[i] == key) & (lst_values[i] != value):
                     # Remove the permutations that don't match the evidence
                     perms.remove(perm)
 
     return perms
 
 
-def product(factorA, factorB, e):
+def product(nodes, factorA, factorB, e):
     vars = []
     vars.extend(factorA[0])
     vars.extend(factorB[0])
@@ -143,7 +159,7 @@ def product(factorA, factorB, e):
     return vars, probabilities
 
 
-def sum_out(var, factors, e):
+def sum_out(nodes, var, factors, e):
     """
     Sum out factors, based on var
     :param var:         The var to remove
@@ -162,7 +178,7 @@ def sum_out(var, factors, e):
             del factors[i]
         result = factors_with_var[0]
         for factor in factors_with_var[1:]:
-            result = product(result, factor, e)
+            result = product(nodes, result, factor, e)
         factors.append(result)
 
     # SUM-OUT OPERATION
@@ -223,22 +239,31 @@ def init_factors(nodes, q, e, flag):
         vars = filter(lambda var: var not in elimd, list(nodes.keys()))
         if flag==1:
             vars = filter(lambda var: all(parent in elimd for parent in nodes[var].parent), vars)
-        else:
+        elif flag==2:
             vars = filter(lambda var: all(child in elimd for child in nodes[var].child), vars)
+        else:
+            tmp={}
+            for v in vars:
+                tmp[v]=nodes[v].cardinal
+            tmp=sorted(tmp.items(), key=lambda x: x[1],reverse=True)
+            vars=[]
+            for a in tmp:
+                vars.append(a[0])
         factor_vars = {}
+
         for var in vars:
             factor_vars[var] = [par for par in nodes[var].parent if par not in e]
             if var not in e:
                 factor_vars[var].append(var)
 
-        # sort elimination according to the number of variables in the factor
-        var_to_elim = sorted(factor_vars.keys(), key=(lambda x: (len(factor_vars[x]), x)))[0]
-        print("Eliminating " + var_to_elim)
+        var_to_elim = list(factor_vars.keys())[0]
+
         if len(factor_vars[var_to_elim]) > 0:
             factors.append(make_factor(nodes, var_to_elim, factor_vars[var_to_elim], e))
 
         if var_to_elim != q and var_to_elim not in e:
-            factors = sum_out(var_to_elim, factors, e)
+            print("Eliminating " + var_to_elim)
+            factors = sum_out(nodes, var_to_elim, factors, e)
 
         elimd.add(var_to_elim)
         i += 1  # Not a part of the code
@@ -246,7 +271,7 @@ def init_factors(nodes, q, e, flag):
     if len(factors) >= 2:
         result = factors[0]
         for factor in factors[1:]:
-            result = product(result, factor, e)
+            result = product(nodes, result, factor, e)
     else:
         result = factors[0]
 
@@ -269,9 +294,9 @@ def normalize_factor(nodes, factor, q):
                     probs_dict[clas]=prob
     for clas, prob in probs_dict.items():
         if len(probs)==0:
-            probs=[(clas,prob/sum_probs)]
+            probs=[(clas,round(prob/sum_probs,5))]
         else:
-            probs.append((clas,prob/sum_probs))
+            probs.append((clas,round(prob/sum_probs,5)))
     return probs
 
 
@@ -308,5 +333,5 @@ if __name__ == "__main__":
             q, e, f = queryParser(query, nodes)
         else:
             break
-
+    print("--------------------------------------------------")
     core(nodes, names, q, e, True)
